@@ -10,28 +10,23 @@ headers = {
     'Referer': 'https://www.avito.ru/'
 }
 
-proxies = {
-    'https': 'http://107.1.93.217:80'
-}
-
-with open("data/source-page.html", encoding="utf-8") as file:
+with open("../data/source-page.html", encoding="utf-8") as file:
     src = file.read()
 
 soup = BeautifulSoup(src, "lxml")
 
-all_ads = soup.find_all(class_ = "body-title-drnL0")
+all_ads = soup.find_all(class_="body-title-drnL0")
 all_ads_dict = {}
 for ads_item in all_ads:
     item = ads_item.find("a")
     item_title = item.text.replace('\xa0', ' ')
     item_href = "https://avito.ru" + item.get("href")
     all_ads_dict[item_title] = item_href
-    # print(f"{item_title}: {item_href}")
 
-with open("data/all_ads_dict.json", "w", encoding="utf-8") as file:
+with open("../data/all_ads_dict.json", "w", encoding="utf-8") as file:
     json.dump(all_ads_dict, file, indent=4, ensure_ascii=False)
 
-service = Service(executable_path= r"C:\Users\shakh\scrap_and_price_prediction\chromedriver\chromedriver.exe")
+service = Service(executable_path=r"C:\Users\shakh\scrap_and_price_prediction\chromedriver\chromedriver.exe")
 options = webdriver.ChromeOptions()
 options.add_argument("user-agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0")
 
@@ -43,22 +38,43 @@ options.add_argument("--disable-blink-features=AutomationControlled")
 
 driver = webdriver.Chrome(service=service, options=options)
 
-floor = "floor"
 room_count = "room_count"
+type_of_rooms = "type_of_rooms"
+full_area = "full_area"
+kitchen_area = "kitchen_area"
+living_area = "living_area"
+floor = "floor"
+balcony = "balcony"
+ceiling_height = "ceiling_height"
+bathroom = "bathroom"
+windows = "windows"
+renovation = "renovation"
+warm_floor = "warm_floor"
+furniture = "furniture"
+technic = "technic"
 
-
-with open(f"data/avito_ads.csv", "w", newline='', encoding="utf-8") as file:
-    writer = csv.writer(file, delimiter=';')
-    writer.writerow(())
+# with open(f"data/avito_ads.csv", "w", newline='', encoding="utf-8") as file:
+#     writer = csv.writer(file, delimiter=';')
+#     writer.writerow((room_count, type_of_rooms, kitchen_area, living_area, floor))
 
 try:
     count = 0
     for name, url in all_ads_dict.items():
-        if count <= 2:
+        if count == 0:
             driver.get(url)
             time.sleep(1)
             src = driver.page_source
             soup = BeautifulSoup(src, "lxml")
+            features = soup.find_all(class_="params-paramsList__item-appQw")
+            room_count = [item.text[-1] if item.text[0] == "К" else None for item in features]
+            item = features[0]
+            print(features)
+            print(int(room_count[0]))
+            # room_count = [item in features if item]
+            # with open(f"data/avito_ads.csv", "a", newline='',
+            #           encoding="utf-8") as file:
+            #     writer = csv.writer(file, delimiter=';')
+            #     writer.writerow((room_count, type_of_rooms, kitchen_area, living_area, floor))
 
         count += 1
 

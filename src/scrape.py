@@ -3,7 +3,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import time
 
-service = Service(executable_path= r"C:\Users\shakh\scrap_and_price_prediction\chromedriver\chromedriver.exe")
+service = Service(executable_path=r"C:\Users\shakh\scrap_and_price_prediction\chromedriver\chromedriver.exe")
 options = webdriver.ChromeOptions()
 options.add_argument("user-agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0")
 
@@ -26,7 +26,7 @@ try:
     while True:
         count = len(driver.find_elements(By.CLASS_NAME, "styles-root-p312D"))
         if count == ads_count:
-            with open("data/source-page.html", "w", encoding="utf-8") as file:
+            with open("../data/source-page.html", "w", encoding="utf-8") as file:
                 file.write(driver.page_source)
             break
         else:
