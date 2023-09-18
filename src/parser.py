@@ -55,16 +55,20 @@ warm_floor = "warm_floor"
 furniture = "furniture"
 technic = "technic"
 
+with open(f"../data/avito_ads.csv", "w", newline='', encoding="utf-8") as file:
+    writer = csv.writer(file, delimiter=';')
+    writer.writerow((room_count, full_area, kitchen_area, living_area, floor))
 
-# with open(f"data/avito_ads.csv", "w", newline='', encoding="utf-8") as file:
-#     writer = csv.writer(file, delimiter=';')
-#     writer.writerow((room_count, full_area, kitchen_area, living_area, floor))
+
 def get_item(items, pattern):
+    areas = ["Общая площадь", "Площадь кухни", "Жилая площадь"]
     result = [item.text for item in items if re.search(pattern, item.text)]
     if not result:
         result = np.nan
     else:
         result = result[0].split(':')[1].strip()
+        if pattern in areas:
+            result = result.split('\xa0')[0].strip()
     return result
 
 
@@ -77,12 +81,20 @@ try:
             src = driver.page_source
             soup = BeautifulSoup(src, "lxml")
             features = soup.find_all(class_="params-paramsList__item-appQw")
-            room_count = get_item(features, "Количество")
+            room_count = get_item(features, "Количество комнат")
+            full_area = get_item(features, "Общая площадь")
+            kitchen_area = get_item(features, "Площадь кухни")
+            living_area = get_item(features, "Жилая площадь")
+            floor = get_item(features, "Этаж")[0]
             print(room_count)
-            # with open(f"data/avito_ads.csv", "a", newline='',
-            #           encoding="utf-8") as file:
-            #     writer = csv.writer(file, delimiter=';')
-            #     writer.writerow((room_count, full_area, kitchen_area, living_area, floor))
+            print(full_area)
+            print(kitchen_area)
+            print(living_area)
+            print(floor)
+            with open(f"../data/avito_ads.csv", "a", newline='',
+                      encoding="utf-8") as file:
+                writer = csv.writer(file, delimiter=';')
+                writer.writerow((room_count, full_area, kitchen_area, living_area, floor))
 
         count += 1
 
