@@ -19,19 +19,19 @@ url = "https://clck.ru/35bu8y"
 
 try:
     driver.get(url)
+    # driver.find_element(By.CLASS_NAME, "styles-box-Up_E3").click()
     scrollable_element = driver.find_element(By.CLASS_NAME, "styles-root-Q2aLw")
     # ads_count = int(driver.find_element(By.CLASS_NAME, "breadcrumbs-count-tSv33").text)
-    ads_count = 111
+    ads_count = 97
     time.sleep(5)
     while True:
-        count = len(driver.find_elements(By.CLASS_NAME, "styles-root-p312D"))
+        count = len(driver.find_elements(By.CLASS_NAME, "styles-snippet-DBv3Q"))
         if count == ads_count:
             with open("../data/source-page.html", "w", encoding="utf-8") as file:
                 file.write(driver.page_source)
             break
         else:
-            driver.execute_script("arguments[0].scrollBy(0, 1000);", scrollable_element)
-            time.sleep(1)
+            driver.execute_script("arguments[0].scrollBy(0, 10000);", scrollable_element)
 
 except Exception as ex:
     print(ex)
