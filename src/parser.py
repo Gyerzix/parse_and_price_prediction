@@ -42,6 +42,8 @@ options.page_load_strategy = 'none'
 
 driver = webdriver.Chrome(service=service, options=options)
 
+driver.maximize_window()
+
 # about the flat
 ID = "id"
 room_count = "room_count"
@@ -71,12 +73,16 @@ parking = "parking"
 # location
 location = "location"
 
+# price
+price = "price"
+price_per_m2 = "price_per_m2"
+
 with open(f"../data/avito_ads.csv", "w", newline='', encoding="utf-8") as file:
     writer = csv.writer(file, delimiter=';')
     writer.writerow((ID, room_count, type_of_rooms, full_area, living_area, flat_floor,
                      balcony, ceiling_height, bathroom, windows, renovation, warm_floor,
                      furniture, technic, location, year_of_build, house_floors,
-                     passenger_elevator, freight_elevator, yard, parking))
+                     passenger_elevator, freight_elevator, yard, parking, price_per_m2, price))
 
 
 def get_item(items, pattern):
@@ -91,6 +97,14 @@ def get_item(items, pattern):
     return result
 
 
+def prep_loc(locs):
+    list_of_loc = locs[0].text.split(' ')
+    result = list_of_loc[0]
+    if result in ["от", "до"]:
+        result = list_of_loc[1]
+    return result
+
+
 try:
     count = 0
     for name, url in all_ads_dict.items():
@@ -101,7 +115,11 @@ try:
         soup = BeautifulSoup(src, "lxml")
 
         ID = soup.find('span', {'data-marker': 'item-view/item-id'}).text.split('\xa0')[1]
-        location = soup.find_all(class_="style-item-address-georeferences-item-interval-ujKs2")[0].text.split(' ')[0]
+        locations = soup.find_all(class_="style-item-address-georeferences-item-interval-ujKs2")  # all locations
+        location = prep_loc(locations)
+        price = int("".join(soup.find('span', {'data-marker': 'item-view/item-price'}).text.split('\xa0')))
+        list_of_price_per_m2 = soup.find(class_="style-item-price-sub-price-_5RUD").text.split('\xa0')
+        price_per_m2 = int(list_of_price_per_m2[0] + list_of_price_per_m2[1])
 
         flat_features = soup.find_all(class_="params-paramsList__item-appQw")
         room_count = get_item(flat_features, "Количество комнат")
@@ -134,8 +152,7 @@ try:
             writer.writerow((ID, room_count, type_of_rooms, full_area, living_area, flat_floor,
                              balcony, ceiling_height, bathroom, windows, renovation, warm_floor,
                              furniture, technic, location, year_of_build, house_floors,
-                             passenger_elevator, freight_elevator, yard, parking))
-
+                             passenger_elevator, freight_elevator, yard, parking, price_per_m2, price))
 except Exception as ex:
     print(ex)
 
