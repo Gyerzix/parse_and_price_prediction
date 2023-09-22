@@ -2,4 +2,4 @@
 /chromedriver
 /data
 /.idea
-__pycache__/
+/src/__pycache__
