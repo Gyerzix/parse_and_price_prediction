@@ -2,3 +2,4 @@
 /chromedriver
 /data
 /.idea
+__pycache__/
