@@ -22,7 +22,7 @@ try:
     # driver.find_element(By.CLASS_NAME, "styles-box-Up_E3").click()
     scrollable_element = driver.find_element(By.CLASS_NAME, "styles-root-Q2aLw")
     # ads_count = int(driver.find_element(By.CLASS_NAME, "breadcrumbs-count-tSv33").text)
-    ads_count = 98
+    ads_count = 55
     while True:
         count = len(driver.find_elements(By.CLASS_NAME, "styles-snippet-DBv3Q"))
         if count == ads_count:
