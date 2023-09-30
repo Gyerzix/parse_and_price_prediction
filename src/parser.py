@@ -1,7 +1,8 @@
+import os
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver import Keys
-from selenium.webdriver.common.by import By
+import requests
 from bs4 import BeautifulSoup
 import numpy as np
 import json
@@ -9,10 +10,8 @@ import re
 import time
 import csv
 
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
-    'Referer': 'https://www.avito.ru/'
-}
+load_dotenv()
+key = os.getenv('API_KEY')
 
 with open("../data/source-page.html", encoding="utf-8") as file:
     src = file.read()
@@ -110,67 +109,66 @@ def prep_loc(locs):
 
 
 try:
+    count = 0
     for name, url in all_ads_dict.items():
-        driver.get(url)
-        time.sleep(5)
-        driver.execute_script("window.stop();")
-        src = driver.page_source
-        soup = BeautifulSoup(src, "lxml")
+        if count == 0:
+            driver.get(url)
+            time.sleep(5)
+            driver.execute_script("window.stop();")
+            src = driver.page_source
+            soup = BeautifulSoup(src, "lxml")
 
-        ID = soup.find('span', {'data-marker': 'item-view/item-id'}).text.split('\xa0')[1]
-        locations = soup.find_all(class_="style-item-address-georeferences-item-interval-ujKs2")  # all locations
-        location = prep_loc(locations)
-        price = int("".join(soup.find('span', {'data-marker': 'item-view/item-price'}).text.split('\xa0')))
-        list_of_price_per_m2 = soup.find(class_="style-item-price-sub-price-_5RUD").text.split('\xa0')
-        price_per_m2 = int(list_of_price_per_m2[0] + list_of_price_per_m2[1])
+            ID = soup.find('span', {'data-marker': 'item-view/item-id'}).text.split('\xa0')[1]
+            locations = soup.find_all(class_="style-item-address-georeferences-item-interval-ujKs2")  # all locations
+            location = prep_loc(locations)
+            price = int("".join(soup.find('span', {'data-marker': 'item-view/item-price'}).text.split('\xa0')))
+            list_of_price_per_m2 = soup.find(class_="style-item-price-sub-price-_5RUD").text.split('\xa0')
+            price_per_m2 = int(list_of_price_per_m2[0] + list_of_price_per_m2[1])
 
-        flat_features = soup.find_all(class_="params-paramsList__item-appQw")
-        room_count = get_item(flat_features, "Количество комнат")
-        type_of_rooms = get_item(flat_features, "Тип комнат")
-        full_area = get_item(flat_features, "Общая площадь")
-        kitchen_area = get_item(flat_features, "Площадь кухни")
-        living_area = get_item(flat_features, "Жилая площадь")
-        flat_floor = get_item(flat_features, "Этаж")[0]
-        balcony = get_item(flat_features, "Балкон или лоджия")
-        ceiling_height = get_item(flat_features, "Высота потолков")
-        bathroom = get_item(flat_features, "Санузел")
-        windows = get_item(flat_features, "Окна")
-        renovation = get_item(flat_features, "Ремонт")
-        warm_floor = get_item(flat_features, "Тёплый пол")
-        furniture = get_item(flat_features, "Мебель")
-        technic = get_item(flat_features, "Техника")
+            flat_features = soup.find_all(class_="params-paramsList__item-appQw")
+            room_count = get_item(flat_features, "Количество комнат")
+            type_of_rooms = get_item(flat_features, "Тип комнат")
+            full_area = get_item(flat_features, "Общая площадь")
+            kitchen_area = get_item(flat_features, "Площадь кухни")
+            living_area = get_item(flat_features, "Жилая площадь")
+            flat_floor = get_item(flat_features, "Этаж")[0]
+            balcony = get_item(flat_features, "Балкон или лоджия")
+            ceiling_height = get_item(flat_features, "Высота потолков")
+            bathroom = get_item(flat_features, "Санузел")
+            windows = get_item(flat_features, "Окна")
+            renovation = get_item(flat_features, "Ремонт")
+            warm_floor = get_item(flat_features, "Тёплый пол")
+            furniture = get_item(flat_features, "Мебель")
+            technic = get_item(flat_features, "Техника")
 
-        house_features = soup.find_all(class_="style-item-params-list-item-aXXql")
-        type_of_house = get_item(house_features, "Тип дома")
-        year_of_build = get_item(house_features, "Год постройки")
-        house_floors = get_item(house_features, "Этажей в доме")
-        passenger_elevator = get_item(house_features, "Пассажирский лифт")
-        freight_elevator = get_item(house_features, "Грузовой лифт")
-        passenger_elevator = int(passenger_elevator) if passenger_elevator not in ("нет", np.nan) else 0
-        freight_elevator = int(freight_elevator) if freight_elevator not in ("нет", np.nan) else 0
-        yard = get_item(house_features, "Двор")
-        parking = get_item(house_features, "Парковка")
+            house_features = soup.find_all(class_="style-item-params-list-item-aXXql")
+            type_of_house = get_item(house_features, "Тип дома")
+            year_of_build = get_item(house_features, "Год постройки")
+            house_floors = get_item(house_features, "Этажей в доме")
+            passenger_elevator = get_item(house_features, "Пассажирский лифт")
+            freight_elevator = get_item(house_features, "Грузовой лифт")
+            passenger_elevator = int(passenger_elevator) if passenger_elevator not in ("нет", np.nan) else 0
+            freight_elevator = int(freight_elevator) if freight_elevator not in ("нет", np.nan) else 0
+            yard = get_item(house_features, "Двор")
+            parking = get_item(house_features, "Парковка")
 
-        address = soup.find(class_="style-item-address__string-wt61A").text
+            address = soup.find(class_="style-item-address__string-wt61A").text
 
-        driver.get("https://dadata.ru/product/geocode/")
-        time.sleep(2)
-        address_field = driver.find_element(By.CLASS_NAME, "custom-input__input")
-        address_field.clear()
-        address_field.send_keys(address)  # для того, чтобы ввести в поле значение
-        address_field.send_keys(Keys.ENTER)
-        time.sleep(2)
-        geolocation = driver.find_element(By.CLASS_NAME, "grid-2-cols--withMobile").text.split("\n")
-        geo_lat = float(geolocation[1])
-        geo_lon = float(geolocation[3])
+            url = f"https://geocode-maps.yandex.ru/1.x/?apikey={key}&geocode={address}&format=json"
+            res = requests.get(url)
+            data = json.loads(res.text)
+            geolocation = data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split(' ')
+            geo_lat, geo_lon = geolocation[0], geolocation[1]
+            print(geo_lat, geo_lon)
 
-        with open(f"../data/avito_ads.csv", "a", newline='',
-                  encoding="utf-8") as file:
-            writer = csv.writer(file, delimiter=';')
-            writer.writerow((ID, room_count, type_of_rooms, full_area, living_area, flat_floor,
-                             balcony, ceiling_height, bathroom, windows, renovation, warm_floor,
-                             furniture, technic, location, geo_lat, geo_lon, year_of_build, house_floors,
-                             passenger_elevator, freight_elevator, yard, parking, price_per_m2, price))
+            with open(f"../data/avito_ads.csv", "a", newline='',
+                      encoding="utf-8") as file:
+                writer = csv.writer(file, delimiter=';')
+                writer.writerow((ID, room_count, type_of_rooms, full_area, living_area, flat_floor,
+                                 balcony, ceiling_height, bathroom, windows, renovation, warm_floor,
+                                 furniture, technic, location, geo_lat, geo_lon, year_of_build, house_floors,
+                                 passenger_elevator, freight_elevator, yard, parking, price_per_m2, price))
+        count += 1
 
 except Exception as ex:
     print(ex)
