@@ -111,7 +111,7 @@ def prep_loc(locs):
 try:
     count = 0
     for name, url in all_ads_dict.items():
-        if count == 0:
+        if count < 20:
             driver.get(url)
             time.sleep(5)
             driver.execute_script("window.stop();")
@@ -158,8 +158,7 @@ try:
             res = requests.get(url)
             data = json.loads(res.text)
             geolocation = data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'].split(' ')
-            geo_lat, geo_lon = geolocation[0], geolocation[1]
-            print(geo_lat, geo_lon)
+            geo_lat, geo_lon = geolocation[1], geolocation[0]
 
             with open(f"../data/avito_ads.csv", "a", newline='',
                       encoding="utf-8") as file:
