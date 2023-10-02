@@ -15,14 +15,13 @@ driver = webdriver.Chrome(service=service, options=options)
 driver.maximize_window()
 
 # url = "https://clck.ru/35RGvD" # основная ссылка
-url = "https://clck.ru/35bu8y"
+url = "https://clck.ru/35w4V7"
 
 try:
     driver.get(url)
-    # driver.find_element(By.CLASS_NAME, "styles-box-Up_E3").click()
+    driver.find_element(By.CLASS_NAME, "styles-box-Up_E3").click()
     scrollable_element = driver.find_element(By.CLASS_NAME, "styles-root-Q2aLw")
-    # ads_count = int(driver.find_element(By.CLASS_NAME, "breadcrumbs-count-tSv33").text)
-    ads_count = 55
+    ads_count = 45
     while True:
         count = len(driver.find_elements(By.CLASS_NAME, "styles-snippet-DBv3Q"))
         if count == ads_count:

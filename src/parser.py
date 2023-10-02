@@ -80,12 +80,12 @@ geo_lon = "geo_lon"
 price = "price"
 price_per_m2 = "price_per_m2"
 
-with open(f"../data/avito_ads.csv", "w", newline='', encoding="utf-8") as file:
-    writer = csv.writer(file, delimiter=';')
-    writer.writerow((ID, room_count, type_of_rooms, full_area, living_area, flat_floor,
-                     balcony, ceiling_height, bathroom, windows, renovation, warm_floor,
-                     furniture, technic, location, geo_lat, geo_lon, year_of_build, house_floors,
-                     passenger_elevator, freight_elevator, yard, parking, price_per_m2, price))
+# with open(f"../data/avito_ads.csv", "w", newline='', encoding="utf-8") as file:
+#     writer = csv.writer(file, delimiter=';')
+#     writer.writerow((ID, room_count, type_of_rooms, full_area, living_area, flat_floor,
+#                      balcony, ceiling_height, bathroom, windows, renovation, warm_floor,
+#                      furniture, technic, location, geo_lat, geo_lon, year_of_build, house_floors,
+#                      passenger_elevator, freight_elevator, yard, parking, price_per_m2, price))
 
 
 def get_item(items, pattern):
@@ -110,8 +110,9 @@ def prep_loc(locs):
 
 try:
     count = 0
+    initial = 0
     for name, url in all_ads_dict.items():
-        if count < 20:
+        if count >= initial:
             driver.get(url)
             time.sleep(5)
             driver.execute_script("window.stop();")
@@ -167,6 +168,7 @@ try:
                                  balcony, ceiling_height, bathroom, windows, renovation, warm_floor,
                                  furniture, technic, location, geo_lat, geo_lon, year_of_build, house_floors,
                                  passenger_elevator, freight_elevator, yard, parking, price_per_m2, price))
+        print(count)
         count += 1
 
 except Exception as ex:
